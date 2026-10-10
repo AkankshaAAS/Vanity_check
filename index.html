@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanity Inventory | Anshul Saraogi Makeup & Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --burgundy:#A3365A;
+    --burgundy-dark:#7D2745;
+    --burgundy-light:#F7E9EE;
+    --gold:#C79A45;
+    --cream:#FBF8F3;
+    --ink:#2B2229;
+    --ink-soft:#6B5F66;
+    --line:#EDE3E7;
+    --white:#FFFFFF;
+    --green:#3E7A54;
+    --green-bg:#EAF4EC;
+    --amber:#B8792B;
+    --amber-bg:#FBF1E2;
+    --red:#B8404A;
+    --red-bg:#FBEBEC;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(43,34,41,0.06);
+    --shadow-lg:0 12px 32px rgba(43,34,41,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0;}
+  a{text-decoration:none;color:inherit;}
+
+  /* Layout */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:280px;flex-shrink:0;background:var(--white);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;padding:28px 20px;position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 26px;border-bottom:1px solid var(--line);margin-bottom:22px;}
+  .brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--burgundy),var(--burgundy-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19px;}
+  .brand-text h1{font-size:16px;color:var(--ink);line-height:1.2;font-weight:600;}
+  .brand-text span{font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;}
+
+  .nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:var(--ink-soft);
+    font-size:14.5px;font-weight:500;cursor:pointer;transition:.15s;border:none;background:none;width:100%;text-align:left;
+  }
+  .nav-item svg{width:18px;height:18px;flex-shrink:0;}
+  .nav-item:hover{background:var(--burgundy-light);color:var(--burgundy-dark);}
+  .nav-item.active{background:var(--burgundy);color:#fff;}
+  .nav-badge{margin-left:auto;background:var(--red-bg);color:var(--red);font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;}
+  .nav-item.active .nav-badge{background:rgba(255,255,255,.25);color:#fff;}
+
+  .sidebar-foot{border-top:1px solid var(--line);padding-top:16px;margin-top:12px;}
+  .api-status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);padding:0 6px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+  .dot.live{background:var(--green);}
+
+  .main{flex:1;min-width:0;padding:32px 40px 60px;max-width:1180px;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:20px;flex-wrap:wrap;}
+  .page-title h2{font-size:28px;color:var(--ink);font-weight:600;}
+  .page-title p{margin-top:4px;color:var(--ink-soft);font-size:14px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;
+    font-family:'Inter';font-size:14px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap;
+  }
+  .btn-primary{background:var(--burgundy);color:#fff;}
+  .btn-primary:hover{background:var(--burgundy-dark);}
+  .btn-ghost{background:var(--white);color:var(--ink);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--burgundy);color:var(--burgundy);}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:8px;}
+  .btn svg{width:15px;height:15px;}
+
+  /* Cards / stats */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .stat-card .label{font-size:12.5px;color:var(--ink-soft);font-weight:500;display:flex;align-items:center;gap:6px;}
+  .stat-card .value{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;margin-top:6px;color:var(--ink);}
+  .stat-card.accent .value{color:var(--burgundy);}
+  .stat-card.warn .value{color:var(--amber);}
+
+  .panel{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);}
+  .panel-head h3{font-size:18px;font-weight:600;}
+  .panel-body{padding:6px 22px 20px;}
+  .panel-body.pad0{padding:0;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;color:var(--ink-soft);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:12px 14px;border-bottom:1px solid var(--line);background:#FCFAF7;}
+  td{padding:13px 14px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#FDFBF8;}
+  .empty-row td{text-align:center;color:var(--ink-soft);padding:40px 0;font-style:italic;}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;}
+  .pill-out{background:var(--amber-bg);color:var(--amber);}
+  .pill-returned{background:var(--green-bg);color:var(--green);}
+  .pill-low{background:var(--red-bg);color:var(--red);}
+  .pill-ok{background:var(--green-bg);color:var(--green);}
+
+  input,select{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-family:'Inter';font-size:14px;
+    background:var(--white);color:var(--ink);transition:.15s;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--burgundy);box-shadow:0 0 0 3px var(--burgundy-light);}
+  label{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;display:block;}
+  .field{margin-bottom:16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-row input,.search-row select{width:auto;min-width:160px;flex:1;}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(43,34,41,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--white);border-radius:16px;width:100%;max-width:440px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;}
+  .modal-head{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{font-size:19px;}
+  .modal-close{background:none;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;line-height:1;}
+  .modal-body{padding:22px 24px;}
+  .modal-foot{padding:16px 24px 22px;display:flex;gap:10px;justify-content:flex-end;}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:13px 20px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:200;display:none;align-items:center;gap:8px;}
+  .toast.show{display:flex;}
+  .toast.err{background:var(--red);}
+
+  .row-actions{display:flex;gap:6px;}
+  .icon-btn{background:none;border:1px solid var(--line);border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);}
+  .icon-btn:hover{border-color:var(--burgundy);color:var(--burgundy);}
+
+  .hidden{display:none !important;}
+
+  /* Mobile */
+  .hamburger{display:none;background:var(--white);border:1px solid var(--line);border-radius:9px;width:40px;height:40px;align-items:center;justify-content:center;cursor:pointer;}
+  @media(max-width:920px){
+    .sidebar{position:fixed;left:-280px;top:0;z-index:90;transition:.2s;box-shadow:var(--shadow-lg);}
+    .sidebar.open{left:0;}
+    .hamburger{display:flex;}
+    .main{padding:20px 16px 50px;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .field-row{grid-template-columns:1fr;}
+    .topbar{align-items:center;}
+    table{font-size:12.5px;}
+    th,td{padding:10px 8px;}
+    /* Prevent iOS Safari auto-zoom on focus (needs >=16px) and give
+       every tappable control a comfortable touch target. */
+    input, select{font-size:16px;padding:11px 12px;}
+    .btn{min-height:42px;}
+    .btn-sm{min-height:36px;}
+    .icon-btn{width:34px;height:34px;}
+    .row-actions{flex-wrap:wrap;}
+    .modal{max-width:94vw;}
+    .modal-body{padding:18px 18px;}
+    .panel-body{padding-left:16px;padding-right:16px;}
+    .search-row{flex-direction:column;}
+    .search-row input, .search-row select{width:100%;min-width:0;}
+  }
+
+  /* ============ MOBILE: admin tables become stacked cards ============ */
+  @media(max-width:700px){
+    .panel-body table, .panel-body table tbody, .panel-body table tr, .panel-body table td{display:block;width:100%;}
+    .panel-body table thead{display:none;}
+    .panel-body table tr{padding:12px 16px;border-bottom:1px solid var(--line);}
+    .panel-body table tr:last-child{border-bottom:none;}
+    .panel-body table td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:5px 0;border:none;text-align:right;background:none;}
+    .panel-body table td::before{content:"";color:var(--ink-soft);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;text-align:left;flex-shrink:0;}
+    .panel-body table td:first-child{font-size:14.5px;font-weight:600;text-align:left;justify-content:flex-start;padding-bottom:8px;}
+    .panel-body table td:last-child:empty{display:none;}
+    .panel-body table .row-actions{width:100%;justify-content:flex-end;gap:8px;}
+    .panel-body table td .btn{width:auto;}
+    .panel-body table tr.empty-row td{display:block;text-align:center;}
+    .panel-body table tr.empty-row td::before{display:none;}
+    #checksBody td:last-child{flex-direction:column;align-items:flex-start;text-align:left;}
+    .panel-body div[style*="overflow-x:auto"]{overflow-x:visible !important;}
+    #lowStockBody td:nth-child(2)::before{content:"Category";}
+    #lowStockBody td:nth-child(3)::before{content:"In Stock";}
+    #lowStockBody td:nth-child(4)::before{content:"Threshold";}
+    #dashOutBody td:nth-child(2)::before{content:"Qty";}
+    #dashOutBody td:nth-child(3)::before{content:"Taken By";}
+    #dashOutBody td:nth-child(4)::before{content:"Time Out";}
+    #dashOutBody td:nth-child(5)::before{content:"Status";}
+    #invBody td:nth-child(2)::before{content:"Category";}
+    #invBody td:nth-child(3)::before{content:"Brand";}
+    #invBody td:nth-child(4)::before{content:"In Stock";}
+    #invBody td:nth-child(5)::before{content:"Status";}
+    #invBody td:nth-child(6)::before{content:"Updated";}
+    #outBody td:nth-child(2)::before{content:"Qty";}
+    #outBody td:nth-child(3)::before{content:"Taken By";}
+    #outBody td:nth-child(4)::before{content:"Time Out";}
+    #histBody td:nth-child(2)::before{content:"Qty";}
+    #histBody td:nth-child(3)::before{content:"Taken By";}
+    #histBody td:nth-child(4)::before{content:"Date Out";}
+    #histBody td:nth-child(5)::before{content:"Time Out";}
+    #histBody td:nth-child(6)::before{content:"Status";}
+    #histBody td:nth-child(7)::before{content:"Returned By";}
+    #histBody td:nth-child(8)::before{content:"Date Returned";}
+    #histBody td:nth-child(9)::before{content:"Time Returned";}
+    #checksBody td:nth-child(2)::before{content:"Vanity";}
+    #checksBody td:nth-child(3)::before{content:"Type";}
+    #checksBody td:nth-child(4)::before{content:"Date";}
+    #checksBody td:nth-child(5)::before{content:"Time";}
+    #checksBody td:nth-child(6)::before{content:"Missing Items";}
+  }
+  @media(max-width:400px){
+    .gate-card{padding:28px 20px 24px;}
+    .gate-mark{width:48px;height:48px;font-size:24px;}
+    .stat-grid{grid-template-columns:1fr;}
+    .user-header-inner{padding:14px 14px 8px;}
+    .user-greeting{font-size:19px;}
+    .user-main{padding:14px 12px 60px;}
+    .checklist-row{padding:12px 13px;}
+  }
+  .sidebar-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:80;}
+  .sidebar-scrim.show{display:block;}
+
+  /* ============ GATE SCREEN ============ */
+  .gate{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(160deg,var(--cream) 0%,var(--burgundy-light) 100%);
+  }
+  .gate-card{
+    background:var(--white);border-radius:20px;box-shadow:var(--shadow-lg);padding:38px 32px 30px;
+    width:100%;max-width:380px;text-align:center;
+  }
+  .gate-mark{
+    width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--burgundy),var(--burgundy-dark));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;
+    font-weight:700;font-size:28px;margin:0 auto 16px;
+  }
+  .gate-card h1{font-size:24px;color:var(--ink);font-weight:600;}
+  .gate-card p{font-size:13px;color:var(--ink-soft);margin-top:4px;letter-spacing:.03em;text-transform:uppercase;}
+  .gate-admin-link{margin-top:18px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+  .gate-admin-link:hover{color:var(--burgundy);}
+
+  /* ============ USER MODE ============ */
+  .userwrap{min-height:100vh;background:var(--cream);}
+  .user-header{background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;box-shadow:var(--shadow);}
+  .user-header-inner{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 12px;}
+  .user-greeting{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--ink);}
+  .user-date{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .user-tabs{display:flex;padding:0 20px;gap:6px;}
+  .user-tab{
+    flex:1;background:none;border:none;padding:12px 8px;font-family:'Inter';font-size:14px;font-weight:600;
+    color:var(--ink-soft);cursor:pointer;border-bottom:2.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .user-tab.active{color:var(--burgundy);border-bottom-color:var(--burgundy);}
+  .user-tab .nav-badge{background:var(--red-bg);color:var(--red);}
+  .user-tab.active .nav-badge{background:var(--burgundy);color:#fff;}
+
+  .user-main{max-width:640px;margin:0 auto;padding:18px 16px 60px;}
+  .user-product-list{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .user-card{
+    background:var(--white);border:1px solid var(--line);border-radius:14px;padding:15px 16px;
+    box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+  .user-card-info{flex:1;min-width:140px;}
+  .user-card-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+  .user-card-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+  .user-card-actions{display:flex;align-items:center;gap:8px;}
+  .qty-stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .qty-stepper button{background:var(--cream);border:none;width:28px;height:30px;font-size:15px;cursor:pointer;color:var(--ink);}
+  .qty-stepper span{width:26px;text-align:center;font-size:13.5px;font-weight:600;}
+  /* ---- Take Out: tick on left + select all ---- */
+  .select-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 0 4px;}
+  .select-all{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);user-select:none;margin:0;}
+  .select-count{font-size:12.5px;color:var(--ink-soft);font-weight:500;}
+  .sel-box{
+    width:24px;height:24px;border-radius:7px;border:2px solid #D8CBD1;background:var(--white);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:transparent;
+  }
+  .sel-box svg{width:15px;height:15px;}
+  .sel-box.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .sel-box.partial{background:var(--burgundy);border-color:var(--burgundy);color:#fff;}
+  .user-card.selected{background:var(--green-bg);border-color:#CFE7D6;}
+  .user-card .user-card-info{cursor:pointer;}
+  .btn-selected{background:var(--green);color:#fff;}
+  .btn-selected:hover{background:#336646;}
+  .takeout-footer{
+    position:sticky;bottom:0;background:var(--cream);border-top:1px solid var(--line);
+    padding:12px 0 calc(10px + env(safe-area-inset-bottom));margin-top:14px;box-shadow:0 -6px 14px rgba(43,34,41,.06);
+  }
+  .user-empty{text-align:center;color:var(--ink-soft);font-style:italic;padding:50px 20px;font-size:14px;}
+
+  /* ============ CHECKLIST TABS (Before Setup / After Packup) ============ */
+  .user-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .checklist-intro{
+    background:var(--burgundy-light);color:var(--burgundy-dark);font-size:13px;line-height:1.5;
+    padding:12px 14px;border-radius:12px;margin-top:14px;
+  }
+  .cat-pills{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:14px 0 4px;}
+
+  .vanity-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .vanity-tab{
+    flex-shrink:0;padding:10px 20px;border-radius:11px;border:1px solid var(--line);background:var(--white);
+    font-family:'Inter';font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:8px;transition:.15s;
+  }
+  .vanity-tab.active{background:var(--burgundy);border-color:var(--burgundy);color:#fff;}
+  .vanity-tab .vt-count{
+    background:var(--cream);color:var(--ink-soft);font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:20px;
+  }
+  .vanity-tab.active .vt-count{background:rgba(255,255,255,.25);color:#fff;}
+  .cat-pill{
+    flex-shrink:0;padding:8px 15px;border-radius:20px;border:1px solid var(--line);background:var(--white);
+    font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;white-space:nowrap;position:relative;
+  }
+  .cat-pill.active{background:var(--burgundy);border-color:var(--burgundy);color:#fff;}
+  .cat-pill .cat-pill-badge{
+    display:inline-block;min-width:16px;height:16px;border-radius:10px;background:var(--red);color:#fff;
+    font-size:10px;line-height:16px;text-align:center;padding:0 4px;margin-left:5px;
+  }
+  .checklist-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+  .checklist-row{
+    display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);
+    border-radius:12px;padding:13px 15px;cursor:pointer;transition:.15s;
+  }
+  .checklist-row.checked{background:var(--red-bg);border-color:#EFC9CC;}
+  .checklist-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--red);flex-shrink:0;cursor:pointer;}
+  .checklist-row-name{font-size:14px;font-weight:500;color:var(--ink);flex:1;}
+  .checklist-row.checked .checklist-row-name{color:var(--red);font-weight:600;}
+  .checklist-footer{
+    position:sticky;bottom:0;background:var(--cream);border-top:1px solid var(--line);
+    padding:12px 0 calc(10px + env(safe-area-inset-bottom));margin-top:14px;box-shadow:0 -6px 14px rgba(43,34,41,.06);
+  }
+  .checklist-count{text-align:center;font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;font-weight:500;}
+  .checklist-confirm{
+    background:var(--green-bg);border:1px solid #CFE7D6;color:var(--green);border-radius:12px;
+    padding:14px 16px;margin-top:14px;font-size:13.5px;line-height:1.5;
+  }
+  .checklist-confirm strong{display:block;font-size:14.5px;margin-bottom:2px;}
+  @media(max-width:480px){
+    .user-card{flex-direction:row;}
+    .user-header-inner{padding:16px 16px 10px;}
+    .qty-stepper button{width:32px;height:34px;font-size:17px;}
+    .qty-stepper span{width:30px;}
+    .user-card-actions{width:100%;justify-content:space-between;}
+    .checklist-row input[type=checkbox]{width:21px;height:21px;}
+    .vanity-tab, .cat-pill{padding:9px 14px;font-size:12.5px;}
+    .user-tab{font-size:13px;padding:11px 6px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     GATE SCREEN — first thing anyone sees when they open the link
+     ============================================================ -->
+<div class="gate" id="gateScreen">
+  <div class="gate-card">
+    <div class="gate-mark">A</div>
+    <h1>Vanity Inventory</h1>
+    <p>Anshul Saraogi Makeup &amp; Studio</p>
+    <div class="field" style="text-align:left;margin-top:24px;">
+      <label>Your Name</label>
+      <input type="text" id="gateName" placeholder="Type your name" list="gateNameList" autocomplete="off">
+      <datalist id="gateNameList"></datalist>
+    </div>
+    <div class="field" style="text-align:left;">
+      <label>Date</label>
+      <input type="date" id="gateDate">
+    </div>
+    <button class="btn btn-primary" id="gateContinue" style="width:100%;justify-content:center;margin-top:6px;">Continue to Vanity</button>
+    <div class="gate-admin-link" id="gateAdminLink">Studio admin? Open dashboard</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN SIGN-IN — email check before the backend dashboard opens
+     ============================================================ -->
+<div class="gate hidden" id="adminGate">
+  <div class="gate-card">
+    <div class="gate-mark">A</div>
+    <h1>Studio Admin</h1>
+    <p>Sign in to view the backend</p>
+    <div class="field" style="text-align:left;margin-top:24px;">
+      <label>Admin Email</label>
+      <input type="email" id="adminEmail" placeholder="you@anshulasaraogi.in" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" id="adminGateContinue" style="width:100%;justify-content:center;margin-top:6px;">Sign In</button>
+    <div class="gate-admin-link" id="adminGateBack">← Back to vanity link</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     USER MODE — simplified take-out / return flow for the vanity
+     ============================================================ -->
+<div class="userwrap hidden" id="userApp">
+  <header class="user-header">
+    <div class="user-header-inner">
+      <div>
+        <div class="user-greeting" id="userGreeting">Hi</div>
+        <div class="user-date" id="userDateLabel"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="userSwitch">Switch user</button>
+    </div>
+    <div class="user-tabs">
+      <button class="user-tab active" data-utab="before">Before Setup</button>
+      <button class="user-tab" data-utab="after">After Packup</button>
+      <button class="user-tab" data-utab="browse">Take Out</button>
+      <button class="user-tab" data-utab="mine">Items <span class="nav-badge" id="myItemsBadge">0</span></button>
+    </div>
+  </header>
+
+  <main class="user-main">
+    <!-- BEFORE VANITY SETUP -->
+    <section id="utab-before">
+      <div class="checklist-intro">Tick only the products that are <strong>missing</strong> from the vanity before you start setting up.</div>
+      <div class="checklist-confirm hidden" id="beforeConfirm"></div>
+      <div class="vanity-tabs" id="beforeVanityTabs"></div>
+      <div class="cat-pills" id="beforeCatPills"></div>
+      <div id="beforeChecklist" class="checklist-list"></div>
+      <div class="checklist-footer">
+        <div class="checklist-count" id="beforeMissingCount">0 items marked missing</div>
+        <button class="btn btn-primary" id="beforeSubmit" style="width:100%;justify-content:center;">Submit Before-Setup Check</button>
+      </div>
+    </section>
+
+    <!-- AFTER VANITY PACKUP -->
+    <section id="utab-after" class="hidden">
+      <div class="checklist-intro">Tick only the products that are <strong>missing</strong> from the vanity while packing up after the event.</div>
+      <div class="checklist-confirm hidden" id="afterConfirm"></div>
+      <div class="vanity-tabs" id="afterVanityTabs"></div>
+      <div class="cat-pills" id="afterCatPills"></div>
+      <div id="afterChecklist" class="checklist-list"></div>
+      <div class="checklist-footer">
+        <div class="checklist-count" id="afterMissingCount">0 items marked missing</div>
+        <button class="btn btn-primary" id="afterSubmit" style="width:100%;justify-content:center;">Submit After-Packup Check</button>
+      </div>
+    </section>
+
+    <!-- BROWSE / TAKE OUT -->
+    <section id="utab-browse" class="hidden">
+      <div class="vanity-tabs" id="browseVanityTabs"></div>
+      <div class="search-row" style="margin-top:4px;">
+        <input type="text" id="userSearch" placeholder="Search products...">
+        <select id="userCategoryFilter"><option value="">All categories</option></select>
+      </div>
+      <div class="select-bar" id="selectBar">
+        <label class="select-all" id="selectAllBtn" onclick="toggleSelectAll()">
+          <span class="sel-box" id="selectAllBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          Select all
+        </label>
+        <span class="select-count" id="selectCount"></span>
+      </div>
+      <div id="userProductList" class="user-product-list"></div>
+      <div class="takeout-footer hidden" id="takeoutFooter">
+        <button class="btn btn-primary" id="takeoutSelectedBtn" style="width:100%;justify-content:center;" onclick="submitSelectedTakeOut()">Take Out Selected</button>
+      </div>
+    </section>
+
+    <!-- MY ITEMS -->
+    <section id="utab-mine" class="hidden">
+      <div id="myItemsList" class="user-product-list"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============================================================
+     ADMIN DASHBOARD — full backend view (open with ?admin=1)
+     ============================================================ -->
+<div class="app hidden" id="adminApp">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-text">
+        <h1>Vanity Inventory</h1>
+        <span>Anshul Saraogi Studio</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="inventory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7L12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        Inventory
+      </button>
+      <button class="nav-item" data-page="takeout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h16l-1.5 12h-13L4 8Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        Take Out
+      </button>
+      <button class="nav-item" data-page="currentlyout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Currently Out
+        <span class="nav-badge" id="outBadge">0</span>
+      </button>
+      <button class="nav-item" data-page="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 7v5l4 2"/></svg>
+        History
+      </button>
+      <button class="nav-item" data-page="checks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Vanity Checks
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="api-status"><span class="dot" id="statusDot"></span><span id="statusText">Connecting…</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="page-title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSubtitle">A quick look at what's in the vanity and what's out with a client.</p>
+      </div>
+      <div id="pageActions"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="page">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="label">Total Products</div><div class="value" id="statTotal">0</div></div>
+        <div class="stat-card warn"><div class="label">Low Stock</div><div class="value" id="statLow">0</div></div>
+        <div class="stat-card accent"><div class="label">Currently Out</div><div class="value" id="statOut">0</div></div>
+        <div class="stat-card"><div class="label">Returned Today</div><div class="value" id="statReturnedToday">0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Low Stock Alerts</h3></div>
+        <div class="panel-body pad0">
+          <table><thead><tr><th>Product</th><th>Category</th><th>In Stock</th><th>Threshold</th><th></th></tr></thead>
+          <tbody id="lowStockBody"></tbody></table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Currently Out</h3></div>
+        <div class="panel-body pad0">
+          <table><thead><tr><th>Product</th><th>Qty</th><th>Taken By</th><th>Time Out</th><th>Status</th><th></th></tr></thead>
+          <tbody id="dashOutBody"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section id="page-inventory" class="page hidden">
+      <div class="vanity-tabs" id="invVanityTabs"></div>
+      <div class="panel">
+        <div class="panel-body" style="padding-top:20px;">
+          <div class="search-row">
+            <input type="text" id="invSearch" placeholder="Search products...">
+            <select id="invCategoryFilter"><option value="">All categories</option></select>
+          </div>
+          <div style="overflow-x:auto;">
+          <table><thead><tr><th>Product</th><th>Category</th><th>Brand</th><th>In Stock</th><th>Status</th><th>Last Updated</th><th></th></tr></thead>
+          <tbody id="invBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAKE OUT -->
+    <section id="page-takeout" class="page hidden">
+      <div class="panel" style="max-width:520px;">
+        <div class="panel-head"><h3>Log a Take-Out</h3></div>
+        <div class="panel-body" style="padding-top:18px;">
+          <div class="field">
+            <label>Product</label>
+            <select id="toProduct"></select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Quantity</label>
+              <input type="number" id="toQty" min="1" value="1">
+            </div>
+            <div class="field">
+              <label>Taken By</label>
+              <select id="toPerson"></select>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="toSubmit" style="width:100%;justify-content:center;margin-top:6px;">Mark as Taken Out</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURRENTLY OUT -->
+    <section id="page-currentlyout" class="page hidden">
+      <div class="panel">
+        <div class="panel-body pad0">
+          <table><thead><tr><th>Product</th><th>Qty</th><th>Taken By</th><th>Time Out</th><th></th></tr></thead>
+          <tbody id="outBody"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="page-history" class="page hidden">
+      <div class="panel">
+        <div class="panel-body" style="padding-top:20px;">
+          <div class="search-row">
+            <select id="histPersonFilter"><option value="">Everyone</option></select>
+            <select id="histStatusFilter">
+              <option value="">All statuses</option>
+              <option value="Out">Out</option>
+              <option value="Returned">Returned</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto;">
+          <table><thead><tr><th>Product</th><th>Qty</th><th>Taken By</th><th>Date Out</th><th>Time Out</th><th>Status</th><th>Returned By</th><th>Date Returned</th><th>Time Returned</th></tr></thead>
+          <tbody id="histBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VANITY CHECKS -->
+    <section id="page-checks" class="page hidden">
+      <div class="panel">
+        <div class="panel-body" style="padding-top:20px;">
+          <div class="search-row">
+            <select id="checksNameFilter"><option value="">Everyone</option></select>
+            <select id="checksVanityFilter">
+              <option value="">All Vanities</option>
+              <option value="Anshul">Anshul's Vanity</option>
+              <option value="Simran">Simran's Vanity</option>
+              <option value="Studio">Studio Vanity</option>
+            </select>
+            <select id="checksTypeFilter">
+              <option value="">Before &amp; After</option>
+              <option value="Before Setup">Before Setup</option>
+              <option value="After Packup">After Packup</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto;">
+          <table><thead><tr><th>Name</th><th>Vanity</th><th>Type</th><th>Date</th><th>Time</th><th>Missing Items</th></tr></thead>
+          <tbody id="checksBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Product Modal -->
+<div class="overlay" id="productOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="productModalTitle">Add Product</h3>
+      <button class="modal-close" id="productModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pmId">
+      <div class="field"><label>Vanity</label><select id="pmVanity"><option value="Anshul">Anshul's Vanity</option><option value="Simran">Simran's Vanity</option><option value="Studio">Studio Vanity</option></select></div>
+      <div class="field"><label>Product Name</label><input type="text" id="pmName" placeholder="e.g. Nars - Sheer Glow"></div>
+      <div class="field-row">
+        <div class="field"><label>Category</label><input type="text" id="pmCategory" placeholder="e.g. Foundations" list="categoryList"><datalist id="categoryList"></datalist></div>
+        <div class="field"><label>Brand</label><input type="text" id="pmBrand" placeholder="e.g. Charlotte Tilbury"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Qty in Stock</label><input type="number" id="pmQty" min="0" value="0"></div>
+        <div class="field"><label>Low Stock Threshold</label><input type="number" id="pmThreshold" min="0" value="2"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="pmCancel">Cancel</button>
+      <button class="btn btn-primary" id="pmSave">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Take Out Modal -->
+<div class="overlay" id="takeOutOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Take Out Product</h3>
+      <button class="modal-close" id="takeOutModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Product</label>
+        <select id="toModalProduct"></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Quantity</label>
+          <input type="number" id="toModalQty" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>Taken By</label>
+          <select id="toModalPerson"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Date &amp; Time</label>
+        <input type="text" id="toModalTimestamp" disabled style="color:var(--ink-soft);background:#FAF8F5;">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="toModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="toModalSave">Mark as Taken Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mark Returned Modal -->
+<div class="overlay" id="returnOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Mark as Returned</h3>
+      <button class="modal-close" id="returnModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="returnSummary" style="background:var(--burgundy-light);color:var(--burgundy-dark);padding:12px 14px;border-radius:10px;font-size:13.5px;margin-bottom:16px;"></div>
+      <input type="hidden" id="returnLogId">
+      <div class="field">
+        <label>Returned By</label>
+        <select id="returnPerson"></select>
+      </div>
+      <div class="field">
+        <label>Date &amp; Time</label>
+        <input type="text" id="returnModalTimestamp" disabled style="color:var(--ink-soft);background:#FAF8F5;">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="returnModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="returnModalSave">Confirm Returned to Bag</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG — paste your Apps Script Web App URL here once deployed
+   (Same pattern as the Availability Tracker: Deploy > Web App > Anyone)
+   ============================================================ */
+const API_URL = "https://script.google.com/a/macros/anshulasaraogi.in/s/AKfycbwPVcnJvdVjX41FqOMyDR-vVEOrDveQbiAvLInM2YW1lvyx73uSaHhm4RQTbJ4MtuOa6A/exec";
+
+// Roster shown in "Taken By" — edit this list to match your team.
+const TEAM_ROSTER = ["Anshul", "Simran", "Parul", "Gauri"]; // add artist names as needed
+
+// The three vanity kits being tracked.
+const VANITIES = ["Anshul", "Simran", "Studio"];
+
+// Only these emails can open the ?admin=1 backend dashboard.
+const ADMIN_EMAILS = [
+  "admin@anshulasaraogi.in",
+  "mis@anshulasaraogi.in",
+  "simran.anshulsaraogi@gmail.com",
+  "crmanshulasaraogi@gmail.com",
+  "ea@anshulasaraogi.in"
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let PRODUCTS = [];
+let LOGS = [];
+let CHECKS = []; // Before-Setup / After-Packup checklist submissions
+let usingMockData = false;
+let mockDataLoaded = false;
+let adminSignedIn = false;
+
+// Session for User Mode — set once someone fills the gate screen
+let SESSION = { name: "", date: "" };
+let isAdminMode = new URLSearchParams(window.location.search).get("admin") === "1";
+let userActiveTab = "before";
+
+// Checklist working state: which products are currently ticked as "missing",
+// kept separately for the Before-Setup and After-Packup checks.
+const checklistState = {
+  before: { vanity: "Anshul", missing: {}, activeCategory: "", submitted: false, submittedAt: null },
+  after: { vanity: "Anshul", missing: {}, activeCategory: "", submitted: false, submittedAt: null }
+};
+
+// Which vanity the Take Out browse list is currently showing.
+let browseVanity = "Anshul";
+
+/* ============================================================
+   MOCK DATA (shown until API_URL is connected, so the app is
+   fully clickable/demoable right away)
+   ============================================================ */
+function loadMockData(){
+  usingMockData = true;
+  PRODUCTS = [
+    {id:"P001", name:"Cleansing Balm – Clinique", category:"Cleansing & Skincare", brand:"Clinique", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P002", name:"Micellar Cleansing Water", category:"Cleansing & Skincare", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P003", name:"Moisturizing Cream – MAC", category:"Cleansing & Skincare", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P004", name:"MAC – Strobe Cream Hydratant / Luminous", category:"Cleansing & Skincare", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P005", name:"Sugar – 24Hr Rage for Coverage", category:"Foundation / Base", brand:"Sugar", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P006", name:"Ambient – Soft Glow", category:"Foundation / Base", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P007", name:"Airbrush Flawless", category:"Foundation / Base", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P008", name:"NARS – Punjabi", category:"Foundation / Base", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P009", name:"NARS – Fiji", category:"Foundation / Base", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P010", name:"NARS – Stromboli", category:"Foundation / Base", brand:"NARS", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P011", name:"NARS – Gobi", category:"Foundation / Base", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P012", name:"MAC – Studio Fix NC45", category:"Foundation / Base", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P013", name:"Maybelline New York – Fit Me", category:"Foundation / Base", brand:"Maybelline New York", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P014", name:"Make Up For Ever – Foundation / Base", category:"Foundation / Base", brand:"Make Up For Ever", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P015", name:"Born This Way – Natural Beige", category:"Foundation / Base", brand:"Born This Way", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P016", name:"Born This Way – Warm Beige", category:"Foundation / Base", brand:"Born This Way", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P017", name:"Fenty Beauty – Truffle (04)", category:"Foundation / Base", brand:"Fenty Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P018", name:"NARS – Shake Well Bien Agiter", category:"Foundation / Base", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P019", name:"MAC – Studio Radiance", category:"Foundation / Base", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P020", name:"Matte + Poreless 16H (ME)", category:"Foundation / Base", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P021", name:"Giorgio Armani – Power Fabric", category:"Foundation / Base", brand:"Giorgio Armani", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P022", name:"Body Glow Spray", category:"Foundation / Base", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P023", name:"Forever 52", category:"Concealers & Correctors", brand:"Forever 52", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P024", name:"Estée Lauder", category:"Concealers & Correctors", brand:"Estée Lauder", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P025", name:"Dior Backstage", category:"Concealers & Correctors", brand:"Dior", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P026", name:"NARS Radiant Creamy Concealer – Medium 1", category:"Concealers & Correctors", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P027", name:"NARS Radiant Creamy Concealer – Medium 2", category:"Concealers & Correctors", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P028", name:"MAC – Conceal & Correct Palette", category:"Concealers & Correctors", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P029", name:"MAC – Medium Deep Corrector", category:"Concealers & Correctors", brand:"MAC", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P030", name:"Huda Beauty FauxFilter – Peach – Colour Corrector", category:"Concealers & Correctors", brand:"Huda Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P031", name:"Huda Beauty FauxFilter – Peach Light – Colour Corrector", category:"Concealers & Correctors", brand:"Huda Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P032", name:"Small Concealer – Mini Pouch", category:"Concealers & Correctors", brand:"", qty:12, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P033", name:"Translucent Loose Setting Powder", category:"Setting Powder / Setting", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P034", name:"Powder Setting – Veil", category:"Setting Powder / Setting", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P035", name:"Huda Beauty – Setting Powder", category:"Setting Powder / Setting", brand:"Huda Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P036", name:"Huda Beauty – Easy Bake – Pound Cake", category:"Setting Powder / Setting", brand:"Huda Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P037", name:"Hourglass – Powder", category:"Setting Powder / Setting", brand:"Hourglass", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P038", name:"Estée Lauder (Setting Powder / Setting)", category:"Setting Powder / Setting", brand:"Estée Lauder", qty:4, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P039", name:"NARS – Light Reflecting Makeup Setting Mist", category:"Setting Powder / Setting", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P040", name:"Velvet Liquid Blush", category:"Blush", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P041", name:"Diego Dalla Palma – 41", category:"Blush", brand:"Diego Dalla Palma", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P042", name:"Rare Beauty – Happy", category:"Blush", brand:"Rare Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P043", name:"Rare Beauty – Believe", category:"Blush", brand:"Rare Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P044", name:"Make Me Blush – 4SL", category:"Blush", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P045", name:"Chanel – Joues Contraste Powder Blush", category:"Blush", brand:"Chanel", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P046", name:"Blush – 01 – Silky Rose", category:"Blush", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P047", name:"Contour – Hollywood", category:"Contour / Bronzer", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P048", name:"Glow Seeker – Highlighter", category:"Highlighter", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P049", name:"Anastasia Beverly Hills – Highlighter", category:"Highlighter", brand:"Anastasia Beverly Hills", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P050", name:"ColourPop – Eyeshadow Palette", category:"Eyeshadow Palettes", brand:"ColourPop", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P051", name:"Anastasia Beverly Hills – Eyeshadow Palette", category:"Eyeshadow Palettes", brand:"Anastasia Beverly Hills", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P052", name:"Anastasia Beverly Hills – Soft Glam", category:"Eyeshadow Palettes", brand:"Anastasia Beverly Hills", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P053", name:"Anastasia Beverly Hills – Cosmos", category:"Eyeshadow Palettes", brand:"Anastasia Beverly Hills", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P054", name:"Patrick Ta – For Eyes", category:"Eyeshadow Palettes", brand:"Patrick Ta", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P055", name:"Blue Velvet", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P056", name:"Pressed Powder Palette", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P057", name:"MAC – Burgundy Eyeshadow", category:"Eyeshadow Palettes", brand:"MAC", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P058", name:"Nuda Warm – Eyeshadow Palette (301)", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P059", name:"Huda Beauty – Pastel Mint", category:"Eyeshadow Palettes", brand:"Huda Beauty", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P060", name:"Eye Color Quad (04) – Honeymoon", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P061", name:"Brow Zings – Pro Palette", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P062", name:"Eye & Cheek Palette", category:"Eyeshadow Palettes", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P063", name:"Sana – Eye Renkel – Japan", category:"Eye Products", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P064", name:"Contact Lenses", category:"Eye Products", brand:"", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P065", name:"Mascara", category:"Mascara", brand:"", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P066", name:"Smashbox – Foundation Primer", category:"Primer", brand:"Smashbox", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P067", name:"Sparkly – Glitter Primer", category:"Primer", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P068", name:"Glitter Box", category:"Glitter", brand:"", qty:38, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P069", name:"Brush", category:"Brushes & Tools", brand:"", qty:28, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P070", name:"Lip Liner", category:"Brushes & Tools", brand:"", qty:35, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P071", name:"Sponge", category:"Brushes & Tools", brand:"", qty:2, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P072", name:"Makeup Plate", category:"Brushes & Tools", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P073", name:"Body Shimmer – NARS", category:"Body Products", brand:"NARS", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P074", name:"Body Glow Spray (Body Products)", category:"Body Products", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+    {id:"P075", name:"Colors Queen – Eye, Face & Body", category:"Body Products", brand:"", qty:1, threshold:0, vanity:"Anshul", updated:new Date().toISOString()},
+  ];
+  // Everything above belongs to Anshul's vanity.
+  PRODUCTS.forEach(p => { p.vanity = "Anshul"; });
+
+  // Simran's vanity — empty for now; add her products from Admin → Inventory.
+  const simranProducts = [];
+
+  // Studio vanity — shared kit. Lashes added as a placeholder; quantity to be filled in.
+  const studioProducts = [
+    {id:"S001", name:"Lashes", category:"Lashes", brand:"", qty:0, threshold:0, vanity:"Studio", updated:new Date().toISOString()},
+  ];
+
+  PRODUCTS = [...PRODUCTS, ...simranProducts, ...studioProducts];
+
+  const now = Date.now();
+  LOGS = [
+    {id:"L001", product:"NARS – Fiji", qty:1, person:"Simran", timeOut:new Date(now-3600000).toISOString(), status:"Out", timeReturned:"", returnedBy:""},
+    {id:"L002", product:"Huda Beauty – Setting Powder", qty:1, person:"Anshul", timeOut:new Date(now-7200000).toISOString(), status:"Out", timeReturned:"", returnedBy:""},
+    {id:"L003", product:"Rare Beauty – Happy", qty:1, person:"Parul", timeOut:new Date(now-86400000).toISOString(), status:"Returned", timeReturned:new Date(now-82800000).toISOString(), returnedBy:"Parul"},
+  ];
+  CHECKS = [
+    {id:"C001", name:"Parul", type:"Before Setup", timestamp:new Date(now-90000000).toISOString(), missingItems:["NARS Radiant Creamy Concealer – Medium 1"]},
+    {id:"C002", name:"Parul", type:"After Packup", timestamp:new Date(now-82000000).toISOString(), missingItems:[]},
+  ];
+}
+
+/* ============================================================
+   API LAYER
+   ============================================================ */
+async function apiCall(action, payload={}){
+  if(!API_URL || API_URL.includes("PASTE_YOUR")){
+    return handleMockAction(action, payload);
+  }
+  try{
+    const res = await fetch(API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"}, // avoids CORS preflight w/ Apps Script
+      body: JSON.stringify({action, ...payload})
+    });
+    const data = await res.json();
+    return data;
+  }catch(err){
+    console.error(err);
+    showToast("Couldn't reach the sheet — check your connection", true);
+    return {success:false};
+  }
+}
+
+async function fetchAll(){
+  if(!API_URL || API_URL.includes("PASTE_YOUR")){
+    if(!mockDataLoaded){
+      loadMockData();
+      mockDataLoaded = true;
+    }
+    setStatus(false);
+    renderAll();
+    return;
+  }
+  try{
+    const res = await fetch(API_URL + "?action=getAll");
+    const data = await res.json();
+    PRODUCTS = data.products || [];
+    LOGS = data.logs || [];
+    CHECKS = data.checks || [];
+    setStatus(true);
+  }catch(err){
+    console.error(err);
+    if(!mockDataLoaded){
+      loadMockData();
+      mockDataLoaded = true;
+    }
+    setStatus(false);
+  }
+  renderAll();
+}
+
+function handleMockAction(action, payload){
+  // Local fallback so the UI is fully testable before the sheet is connected
+  if(action === "addProduct"){
+    const id = "P" + String(PRODUCTS.length+1).padStart(3,"0");
+    PRODUCTS.push({id, vanity:payload.vanity||"Anshul", name:payload.name, category:payload.category, brand:payload.brand, qty:Number(payload.qty), threshold:Number(payload.threshold), updated:new Date().toISOString()});
+    return {success:true};
+  }
+  if(action === "updateProduct"){
+    const p = PRODUCTS.find(x=>x.id===payload.id);
+    if(p){ Object.assign(p, {vanity:payload.vanity||p.vanity, name:payload.name, category:payload.category, brand:payload.brand, qty:Number(payload.qty), threshold:Number(payload.threshold), updated:new Date().toISOString()}); }
+    return {success:true};
+  }
+  if(action === "deleteProduct"){
+    PRODUCTS = PRODUCTS.filter(x=>x.id!==payload.id);
+    return {success:true};
+  }
+  if(action === "takeOut"){
+    const p = PRODUCTS.find(x=>x.name===payload.product);
+    if(p) p.qty = Math.max(0, p.qty - Number(payload.qty));
+    const id = "L" + String(LOGS.length+1).padStart(3,"0");
+    LOGS.unshift({id, product:payload.product, qty:Number(payload.qty), person:payload.person, timeOut:new Date().toISOString(), status:"Out", timeReturned:"", returnedBy:""});
+    return {success:true};
+  }
+  if(action === "markReturned"){
+    const l = LOGS.find(x=>x.id===payload.id);
+    if(l){
+      l.status="Returned";
+      l.timeReturned=new Date().toISOString();
+      l.returnedBy=payload.returnedBy||l.person;
+      const p = PRODUCTS.find(x=>x.name===l.product);
+      if(p) p.qty = Number(p.qty) + Number(l.qty); // add back to vanity stock
+    }
+    return {success:true};
+  }
+  if(action === "submitCheck"){
+    const id = "C" + String(CHECKS.length+1).padStart(3,"0");
+    CHECKS.unshift({id, name:payload.name, type:payload.type, vanity:payload.vanity||"", timestamp:new Date().toISOString(), missingItems:payload.missingItems||[]});
+    return {success:true};
+  }
+  return {success:false};
+}
+
+function setStatus(live){
+  document.getElementById("statusDot").classList.toggle("live", live);
+  document.getElementById("statusText").textContent = live ? "Synced with Sheet" : "Demo mode (not connected)";
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function fmtTime(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  if(sameDay) return "Today, " + time;
+  return d.toLocaleDateString([], {day:"numeric", month:"short"}) + ", " + time;
+}
+function fmtDateOnly(iso){
+  if(!iso) return "—";
+  return new Date(iso).toLocaleDateString([], {day:"numeric", month:"short", year:"numeric"});
+}
+function fmtTimeOnly(iso){
+  if(!iso) return "—";
+  return new Date(iso).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+}
+function showToast(msg, isErr=false){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.toggle("err", isErr);
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2600);
+}
+function isLow(p){ return Number(p.qty) <= Number(p.threshold); }
+
+/* ============================================================
+   RENDERERS
+   ============================================================ */
+function renderAll(){
+  if(isAdminMode){
+    renderDashboard();
+    renderInventory();
+    renderTakeoutForm();
+    renderCurrentlyOut();
+    renderHistory();
+    renderVanityChecks();
+    document.getElementById("outBadge").textContent = LOGS.filter(l=>l.status==="Out").length;
+  }else{
+    renderUserBrowse();
+    renderMyItems();
+    renderChecklist("before");
+    renderChecklist("after");
+  }
+}
+
+function renderDashboard(){
+  document.getElementById("statTotal").textContent = PRODUCTS.length;
+  document.getElementById("statLow").textContent = PRODUCTS.filter(isLow).length;
+  const outLogs = LOGS.filter(l=>l.status==="Out");
+  document.getElementById("statOut").textContent = outLogs.length;
+  const today = new Date().toDateString();
+  document.getElementById("statReturnedToday").textContent = LOGS.filter(l=>l.status==="Returned" && l.timeReturned && new Date(l.timeReturned).toDateString()===today).length;
+
+  const lowBody = document.getElementById("lowStockBody");
+  const low = PRODUCTS.filter(isLow);
+  lowBody.innerHTML = low.length ? low.map(p=>`
+    <tr><td>${p.name}</td><td>${p.category||"—"}</td><td>${p.qty}</td><td>${p.threshold}</td>
+    <td><span class="pill pill-low">Low</span></td></tr>
+  `).join("") : `<tr class="empty-row"><td colspan="5">Nothing running low right now.</td></tr>`;
+
+  const dashOutBody = document.getElementById("dashOutBody");
+  dashOutBody.innerHTML = outLogs.length ? outLogs.slice(0,6).map(l=>`
+    <tr><td>${l.product}</td><td>${l.qty}</td><td>${l.person}</td><td>${fmtTime(l.timeOut)}</td>
+    <td><span class="pill pill-out">Out</span></td>
+    <td><button class="btn btn-sm btn-ghost" onclick="openReturnModal('${l.id}')">Mark Returned</button></td></tr>
+  `).join("") : `<tr class="empty-row"><td colspan="6">Everything's back in the bag. ✓</td></tr>`;
+}
+
+let invVanityFilter = "Anshul";
+
+function renderInvVanityTabs(){
+  const el = document.getElementById("invVanityTabs");
+  el.innerHTML = VANITIES.map(v=>{
+    const count = PRODUCTS.filter(p=>p.vanity===v).length;
+    return `<button class="vanity-tab ${v===invVanityFilter?'active':''}" onclick="selectInvVanity('${v}')">${v}'s Vanity <span class="vt-count">${count}</span></button>`;
+  }).join("");
+}
+
+function selectInvVanity(vanity){
+  invVanityFilter = vanity;
+  renderInventory();
+}
+
+function renderInventory(){
+  renderInvVanityTabs();
+  const search = (document.getElementById("invSearch").value||"").toLowerCase();
+  const catFilter = document.getElementById("invCategoryFilter").value;
+
+  // populate category filter (scoped to the selected vanity)
+  const cats = [...new Set(PRODUCTS.filter(p=>p.vanity===invVanityFilter).map(p=>p.category).filter(Boolean))];
+  const catSelect = document.getElementById("invCategoryFilter");
+  const currentVal = catSelect.value;
+  catSelect.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  catSelect.value = currentVal;
+
+  const dataList = document.getElementById("categoryList");
+  dataList.innerHTML = cats.map(c=>`<option value="${c}">`).join("");
+
+  let list = PRODUCTS.filter(p =>
+    p.vanity === invVanityFilter &&
+    (!search || p.name.toLowerCase().includes(search) || (p.brand||"").toLowerCase().includes(search)) &&
+    (!catFilter || p.category === catFilter)
+  );
+
+  const body = document.getElementById("invBody");
+  body.innerHTML = list.length ? list.map(p=>`
+    <tr>
+      <td><strong>${p.name}</strong></td>
+      <td>${p.category||"—"}</td>
+      <td>${p.brand||"—"}</td>
+      <td>${p.qty}</td>
+      <td>${isLow(p) ? '<span class="pill pill-low">Low Stock</span>' : '<span class="pill pill-ok">In Stock</span>'}</td>
+      <td>${fmtTime(p.updated)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-sm btn-ghost" title="Take Out" onclick="openTakeOutModal('${p.name.replace(/'/g,"\\'")}')">Take Out</button>
+          <button class="icon-btn" title="Edit" onclick="openProductModal('${p.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="icon-btn" title="Delete" onclick="deleteProduct('${p.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join("") : `<tr class="empty-row"><td colspan="7">No products match. Try adding one.</td></tr>`;
+}
+
+function renderTakeoutForm(){
+  const prodSel = document.getElementById("toProduct");
+  prodSel.innerHTML = PRODUCTS.map(p=>`<option value="${p.name}">${p.name} (${p.qty} in stock)</option>`).join("");
+  const personSel = document.getElementById("toPerson");
+  personSel.innerHTML = TEAM_ROSTER.map(n=>`<option value="${n}">${n}</option>`).join("");
+}
+
+function renderCurrentlyOut(){
+  const outLogs = LOGS.filter(l=>l.status==="Out");
+  const body = document.getElementById("outBody");
+  body.innerHTML = outLogs.length ? outLogs.map(l=>`
+    <tr><td>${l.product}</td><td>${l.qty}</td><td>${l.person}</td><td>${fmtTime(l.timeOut)}</td>
+    <td><button class="btn btn-sm btn-primary" onclick="openReturnModal('${l.id}')">Mark Returned</button></td></tr>
+  `).join("") : `<tr class="empty-row"><td colspan="5">Nothing is currently out.</td></tr>`;
+}
+
+function renderHistory(){
+  const personFilter = document.getElementById("histPersonFilter").value;
+  const statusFilter = document.getElementById("histStatusFilter").value;
+
+  // Names are now freely typed at the gate, so build the filter list from
+  // whoever has actually appeared in the log rather than a fixed roster.
+  const namesSeen = [...new Set(LOGS.flatMap(l => [l.person, l.returnedBy]).filter(Boolean))].sort();
+  const personSel = document.getElementById("histPersonFilter");
+  const cur = personSel.value;
+  personSel.innerHTML = `<option value="">Everyone</option>` + namesSeen.map(n=>`<option value="${n}">${n}</option>`).join("");
+  personSel.value = cur;
+
+  let list = LOGS.filter(l =>
+    (!personFilter || l.person === personFilter || l.returnedBy === personFilter) &&
+    (!statusFilter || l.status === statusFilter)
+  );
+
+  const body = document.getElementById("histBody");
+  body.innerHTML = list.length ? list.map(l=>`
+    <tr><td>${l.product}</td><td>${l.qty}</td><td>${l.person}</td>
+    <td>${fmtDateOnly(l.timeOut)}</td><td>${fmtTimeOnly(l.timeOut)}</td>
+    <td><span class="pill ${l.status==='Out'?'pill-out':'pill-returned'}">${l.status}</span></td>
+    <td>${l.returnedBy || "—"}</td>
+    <td>${l.timeReturned ? fmtDateOnly(l.timeReturned) : "—"}</td>
+    <td>${l.timeReturned ? fmtTimeOnly(l.timeReturned) : "—"}</td></tr>
+  `).join("") : `<tr class="empty-row"><td colspan="9">No log entries match.</td></tr>`;
+}
+
+function renderVanityChecks(){
+  const nameFilter = document.getElementById("checksNameFilter").value;
+  const typeFilter = document.getElementById("checksTypeFilter").value;
+  const vanityFilter = document.getElementById("checksVanityFilter").value;
+
+  const namesSeen = [...new Set(CHECKS.map(c=>c.name).filter(Boolean))].sort();
+  const nameSel = document.getElementById("checksNameFilter");
+  const cur = nameSel.value;
+  nameSel.innerHTML = `<option value="">Everyone</option>` + namesSeen.map(n=>`<option value="${n}">${n}</option>`).join("");
+  nameSel.value = cur;
+
+  let list = CHECKS.filter(c =>
+    (!nameFilter || c.name === nameFilter) &&
+    (!typeFilter || c.type === typeFilter) &&
+    (!vanityFilter || c.vanity === vanityFilter)
+  );
+
+  const body = document.getElementById("checksBody");
+  body.innerHTML = list.length ? list.map(c=>{
+    const missing = (c.missingItems && c.missingItems.length) ? c.missingItems.join(", ") : "None — all present ✓";
+    return `
+    <tr><td>${c.name}</td>
+    <td>${c.vanity ? c.vanity+"'s Vanity" : "—"}</td>
+    <td><span class="pill ${c.type==='Before Setup'?'pill-out':'pill-returned'}">${c.type}</span></td>
+    <td>${fmtDateOnly(c.timestamp)}</td><td>${fmtTimeOnly(c.timestamp)}</td>
+    <td>${missing}</td></tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="6">No checklist submissions yet.</td></tr>`;
+}
+
+/* ============================================================
+   TAKE OUT MODAL (opened from an Inventory row)
+   ============================================================ */
+function openTakeOutModal(productName){
+  const prodSel = document.getElementById("toModalProduct");
+  prodSel.innerHTML = PRODUCTS.map(p=>`<option value="${p.name}" ${p.name===productName?"selected":""}>${p.name} (${p.qty} in stock)</option>`).join("");
+  const personSel = document.getElementById("toModalPerson");
+  personSel.innerHTML = TEAM_ROSTER.map(n=>`<option value="${n}">${n}</option>`).join("");
+  document.getElementById("toModalQty").value = 1;
+  document.getElementById("toModalTimestamp").value = new Date().toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
+  document.getElementById("takeOutOverlay").classList.add("show");
+}
+function closeTakeOutModal(){ document.getElementById("takeOutOverlay").classList.remove("show"); }
+
+async function saveTakeOutModal(){
+  const product = document.getElementById("toModalProduct").value;
+  const qty = document.getElementById("toModalQty").value;
+  const person = document.getElementById("toModalPerson").value;
+  if(!product){ showToast("Choose a product first", true); return; }
+  const res = await apiCall("takeOut", {product, qty, person});
+  if(res.success){
+    showToast(`${product} marked as taken out by ${person} ✓`);
+    closeTakeOutModal();
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+/* ============================================================
+   MARK RETURNED MODAL
+   ============================================================ */
+function openReturnModal(logId){
+  const log = LOGS.find(l=>l.id===logId);
+  if(!log) return;
+  document.getElementById("returnLogId").value = logId;
+  document.getElementById("returnSummary").innerHTML = `<strong>${log.product}</strong> · Qty ${log.qty} · taken out by <strong>${log.person}</strong> on ${fmtTime(log.timeOut)}`;
+  const personSel = document.getElementById("returnPerson");
+  personSel.innerHTML = TEAM_ROSTER.map(n=>`<option value="${n}" ${n===log.person?"selected":""}>${n}</option>`).join("");
+  document.getElementById("returnModalTimestamp").value = new Date().toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
+  document.getElementById("returnOverlay").classList.add("show");
+}
+function closeReturnModal(){ document.getElementById("returnOverlay").classList.remove("show"); }
+
+async function saveReturnModal(){
+  const logId = document.getElementById("returnLogId").value;
+  const returnedBy = document.getElementById("returnPerson").value;
+  const res = await apiCall("markReturned", {id: logId, returnedBy});
+  if(res.success){
+    showToast(`Marked as returned to bag by ${returnedBy} ✓`);
+    closeReturnModal();
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+/* ============================================================
+   USER MODE — gate screen, browse & take out, my items
+   ============================================================ */
+const browseSelected = {}; // productName -> true when ticked for take out
+const userTakeoutQty = {}; // productName -> chosen qty on the stepper before taking out
+
+function initGateScreen(){
+  const nameInput = document.getElementById("gateName");
+  document.getElementById("gateNameList").innerHTML = TEAM_ROSTER.map(n=>`<option value="${n}">`).join("");
+  const dateInput = document.getElementById("gateDate");
+  const today = new Date();
+  dateInput.value = today.toISOString().slice(0,10);
+
+  document.getElementById("gateContinue").addEventListener("click", ()=>{
+    const name = nameInput.value.trim();
+    const date = dateInput.value;
+    if(!name){ showToast("Please type your name", true); return; }
+    if(!date){ showToast("Please pick a date", true); return; }
+    SESSION = { name, date };
+    document.getElementById("gateScreen").classList.add("hidden");
+    document.getElementById("userApp").classList.remove("hidden");
+    document.getElementById("userGreeting").textContent = "Hi, " + name;
+    document.getElementById("userDateLabel").textContent = new Date(date).toLocaleDateString([], {weekday:"long", day:"numeric", month:"long"});
+    fetchAll();
+  });
+
+  document.getElementById("gateAdminLink").addEventListener("click", ()=>{
+    const url = new URL(window.location.href);
+    url.searchParams.set("admin", "1");
+    window.location.href = url.toString();
+  });
+
+  document.getElementById("userSwitch").addEventListener("click", ()=>{
+    SESSION = { name:"", date:"" };
+    document.getElementById("userApp").classList.add("hidden");
+    document.getElementById("gateScreen").classList.remove("hidden");
+    nameInput.value = "";
+  });
+
+  document.querySelectorAll(".user-tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      userActiveTab = tab.dataset.utab;
+      document.querySelectorAll(".user-tab").forEach(t=>t.classList.toggle("active", t===tab));
+      ["before","after","browse","mine"].forEach(name=>{
+        document.getElementById("utab-"+name).classList.toggle("hidden", userActiveTab!==name);
+      });
+      if(userActiveTab==="before") renderChecklist("before");
+      if(userActiveTab==="after") renderChecklist("after");
+    });
+  });
+
+  document.getElementById("userSearch").addEventListener("input", renderUserBrowse);
+  document.getElementById("userCategoryFilter").addEventListener("change", renderUserBrowse);
+  // Note: beforeSubmit/afterSubmit click handlers are assigned dynamically
+  // inside renderChecklist(), since the button toggles between "Submit"
+  // and "Start New Check" depending on submission state.
+}
+
+/* ============================================================
+   BEFORE-SETUP / AFTER-PACKUP CHECKLISTS
+   ============================================================ */
+function renderChecklistVanityTabs(type){
+  const state = checklistState[type];
+  const el = document.getElementById(type+"VanityTabs");
+  el.innerHTML = VANITIES.map(v=>{
+    const count = PRODUCTS.filter(p=>p.vanity===v).length;
+    return `<button class="vanity-tab ${v===state.vanity?'active':''}" onclick="selectChecklistVanity('${type}','${v}')">${v}'s Vanity <span class="vt-count">${count}</span></button>`;
+  }).join("");
+}
+
+function selectChecklistVanity(type, vanity){
+  checklistState[type].vanity = vanity;
+  checklistState[type].activeCategory = ""; // let renderCategoryPills re-pick within the new vanity
+  renderChecklist(type);
+}
+
+function renderCategoryPills(type){
+  const state = checklistState[type];
+  const cats = [...new Set(PRODUCTS.filter(p=>p.vanity===state.vanity).map(p=>p.category).filter(Boolean))];
+  if(!state.activeCategory || !cats.includes(state.activeCategory)){
+    state.activeCategory = cats[0] || "";
+  }
+  const el = document.getElementById(type+"CatPills");
+  el.innerHTML = cats.length ? cats.map(c=>{
+    const missingInCat = PRODUCTS.filter(p=>p.category===c && p.vanity===state.vanity && state.missing[p.name]).length;
+    return `<button class="cat-pill ${c===state.activeCategory?'active':''}" onclick="selectChecklistCategory('${type}','${c.replace(/'/g,"\\'")}')">${c}${missingInCat ? `<span class="cat-pill-badge">${missingInCat}</span>` : ""}</button>`;
+  }).join("") : "";
+}
+
+function selectChecklistCategory(type, category){
+  checklistState[type].activeCategory = category;
+  renderChecklist(type);
+}
+
+function renderChecklist(type){
+  if(isAdminMode) return;
+  renderChecklistVanityTabs(type);
+  renderCategoryPills(type);
+  const state = checklistState[type];
+  const label = type === "before" ? "Before-Setup" : "After-Packup";
+  const confirmEl = document.getElementById(type+"Confirm");
+  const submitBtn = document.getElementById(type+"Submit");
+
+  if(state.submitted){
+    const missingCount = Object.keys(state.missing).length;
+    confirmEl.classList.remove("hidden");
+    confirmEl.innerHTML = `<strong>${state.vanity}'s Vanity — ${label} check saved ✓</strong>Submitted by ${SESSION.name} at ${fmtTimeOnly(state.submittedAt)} on ${fmtDateOnly(state.submittedAt)} — ${missingCount} item${missingCount===1?"":"s"} marked missing.`;
+    submitBtn.textContent = "Start a New " + label + " Check";
+    submitBtn.onclick = ()=>startNewChecklist(type);
+  }else{
+    confirmEl.classList.add("hidden");
+    confirmEl.innerHTML = "";
+    submitBtn.textContent = "Submit " + (type==="before" ? "Before-Setup" : "After-Packup") + " Check";
+    submitBtn.onclick = ()=>submitChecklist(type);
+  }
+
+  const items = PRODUCTS.filter(p=>p.category===state.activeCategory && p.vanity===state.vanity);
+  const listEl = document.getElementById(type+"Checklist");
+  listEl.innerHTML = items.length ? items.map(p=>{
+    const checked = !!state.missing[p.name];
+    return `
+    <label class="checklist-row ${checked?'checked':''}">
+      <input type="checkbox" ${checked?"checked":""} ${state.submitted?"disabled":""} onchange="toggleChecklistItem('${type}','${p.name.replace(/'/g,"\\'")}')">
+      <span class="checklist-row-name">${p.name}</span>
+    </label>`;
+  }).join("") : `<div class="user-empty">No products yet in ${state.vanity}'s vanity for this category.</div>`;
+
+  const missingCount = Object.values(state.missing).filter(Boolean).length;
+  document.getElementById(type+"MissingCount").textContent = state.submitted
+    ? "Checklist locked until you start a new check"
+    : missingCount + " item" + (missingCount===1?"":"s") + " marked missing";
+}
+
+function toggleChecklistItem(type, productName){
+  const state = checklistState[type];
+  if(state.submitted) return; // locked after submitting
+  if(state.missing[productName]) delete state.missing[productName];
+  else state.missing[productName] = true;
+  renderChecklist(type);
+}
+
+function startNewChecklist(type){
+  const vanity = checklistState[type].vanity;
+  checklistState[type] = { vanity, missing: {}, activeCategory: "", submitted: false, submittedAt: null };
+  renderChecklist(type);
+}
+
+async function submitChecklist(type){
+  const state = checklistState[type];
+  const missingItems = Object.keys(state.missing);
+  const label = type === "before" ? "Before Setup" : "After Packup";
+  const res = await apiCall("submitCheck", {name: SESSION.name, type: label, vanity: state.vanity, missingItems});
+  if(res.success){
+    showToast(`${label} check submitted ✓ (${missingItems.length} missing)`);
+    state.submitted = true;
+    state.submittedAt = new Date().toISOString();
+    renderChecklist(type);
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+function renderBrowseVanityTabs(){
+  const el = document.getElementById("browseVanityTabs");
+  el.innerHTML = VANITIES.map(v=>{
+    const count = PRODUCTS.filter(p=>p.vanity===v).length;
+    return `<button class="vanity-tab ${v===browseVanity?'active':''}" onclick="selectBrowseVanity('${v}')">${v}'s Vanity <span class="vt-count">${count}</span></button>`;
+  }).join("");
+}
+
+function selectBrowseVanity(vanity){
+  browseVanity = vanity;
+  Object.keys(browseSelected).forEach(k=>delete browseSelected[k]);
+  renderUserBrowse();
+}
+
+function renderUserBrowse(){
+  if(isAdminMode) return;
+  renderBrowseVanityTabs();
+  const search = (document.getElementById("userSearch").value||"").toLowerCase();
+  const catFilter = document.getElementById("userCategoryFilter").value;
+
+  const cats = [...new Set(PRODUCTS.filter(p=>p.vanity===browseVanity).map(p=>p.category).filter(Boolean))].sort();
+  const catSelect = document.getElementById("userCategoryFilter");
+  const curVal = catSelect.value;
+  catSelect.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  catSelect.value = curVal;
+
+  let list = PRODUCTS.filter(p =>
+    p.vanity === browseVanity &&
+    (!search || p.name.toLowerCase().includes(search) || (p.brand||"").toLowerCase().includes(search)) &&
+    (!catFilter || p.category === catFilter)
+  );
+
+  const el = document.getElementById("userProductList");
+  if(!list.length){
+    el.innerHTML = `<div class="user-empty">No products yet in ${browseVanity}'s vanity.</div>`;
+    browseVisible = [];
+    updateSelectionUI();
+    return;
+  }
+  browseVisible = list.map(p=>p.name);
+  const TICK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+  el.innerHTML = list.map(p=>{
+    const qty = userTakeoutQty[p.name] || 1;
+    const esc = p.name.replace(/'/g,"\\'");
+    const sel = !!browseSelected[p.name];
+    return `
+    <div class="user-card ${sel?'selected':''}">
+      <span class="sel-box ${sel?'on':''}" onclick="toggleBrowseSelect('${esc}')">${TICK}</span>
+      <div class="user-card-info" onclick="toggleBrowseSelect('${esc}')">
+        <div class="user-card-name">${p.name}</div>
+        <div class="user-card-meta">${p.category||"—"}${p.brand ? " · "+p.brand : ""}</div>
+      </div>
+      <div class="user-card-actions">
+        <div class="qty-stepper">
+          <button onclick="adjustUserQty('${p.name.replace(/'/g,"\\'")}',-1)">−</button>
+          <span id="qty-${p.id}">${qty}</span>
+          <button onclick="adjustUserQty('${p.name.replace(/'/g,"\\'")}',1)">+</button>
+        </div>
+        <button class="btn btn-sm ${sel?'btn-selected':'btn-primary'}" onclick="toggleBrowseSelect('${esc}')">${sel?'✓ Selected':'Take Out'}</button>
+      </div>
+    </div>`;
+  }).join("");
+  updateSelectionUI();
+}
+
+let browseVisible = []; // names currently shown in the Take Out list (after filters)
+
+function selectedVisible(){ return browseVisible.filter(n=>browseSelected[n]); }
+
+function toggleBrowseSelect(name){
+  if(browseSelected[name]) delete browseSelected[name]; else browseSelected[name] = true;
+  renderUserBrowse();
+}
+
+function toggleSelectAll(){
+  const allOn = browseVisible.length && browseVisible.every(n=>browseSelected[n]);
+  browseVisible.forEach(n=>{ if(allOn) delete browseSelected[n]; else browseSelected[n] = true; });
+  renderUserBrowse();
+}
+
+function updateSelectionUI(){
+  const n = selectedVisible().length;
+  const total = browseVisible.length;
+  const box = document.getElementById("selectAllBox");
+  box.classList.toggle("on", total>0 && n===total);
+  box.classList.toggle("partial", n>0 && n<total);
+  document.getElementById("selectBar").classList.toggle("hidden", total===0);
+  document.getElementById("selectCount").textContent = n ? `${n} of ${total} selected` : "";
+  document.getElementById("takeoutFooter").classList.toggle("hidden", n===0);
+  document.getElementById("takeoutSelectedBtn").textContent = `Take Out Selected (${n})`;
+}
+
+async function submitSelectedTakeOut(){
+  const names = selectedVisible();
+  if(!names.length) return;
+  const btn = document.getElementById("takeoutSelectedBtn");
+  btn.disabled = true; btn.textContent = "Submitting...";
+  let ok = 0;
+  for(const name of names){
+    const res = await apiCall("takeOut", {product: name, qty: userTakeoutQty[name] || 1, person: SESSION.name});
+    if(res && res.success){ ok++; delete browseSelected[name]; delete userTakeoutQty[name]; }
+  }
+  btn.disabled = false;
+  if(ok === names.length) showToast(`${ok} item${ok>1?'s':''} taken out ✓`);
+  else showToast(`${ok} of ${names.length} taken out — please retry the rest`, true);
+  await fetchAll();
+}
+
+function adjustUserQty(name, delta){
+  const current = userTakeoutQty[name] || 1;
+  userTakeoutQty[name] = Math.max(1, current + delta);
+  renderUserBrowse();
+}
+
+async function userTakeOut(productName, productId){
+  const qty = userTakeoutQty[productName] || 1;
+  const res = await apiCall("takeOut", {product: productName, qty, person: SESSION.name});
+  if(res.success){
+    showToast(`${productName} taken out ✓`);
+    delete userTakeoutQty[productName];
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+function renderMyItems(){
+  if(isAdminMode) return;
+  const mine = LOGS.filter(l => l.person === SESSION.name && l.status === "Out");
+  document.getElementById("myItemsBadge").textContent = mine.length;
+
+  const el = document.getElementById("myItemsList");
+  if(!mine.length){
+    el.innerHTML = `<div class="user-empty">Nothing checked out right now.<br>Everything's kept back ✓</div>`;
+    return;
+  }
+  el.innerHTML = mine.map(l=>`
+    <div class="user-card">
+      <div class="user-card-info">
+        <div class="user-card-name">${l.product}</div>
+        <div class="user-card-meta">Qty ${l.qty} · Taken out ${fmtTime(l.timeOut)}</div>
+      </div>
+      <div class="user-card-actions">
+        <button class="btn btn-sm btn-primary" onclick="userMarkKeptBack('${l.id}')">Kept Back</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function userMarkKeptBack(logId){
+  const res = await apiCall("markReturned", {id: logId, returnedBy: SESSION.name});
+  if(res.success){
+    showToast("Marked as kept back ✓");
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+async function deleteProduct(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!confirm(`Remove "${p.name}" from inventory?`)) return;
+  const res = await apiCall("deleteProduct", {id});
+  if(res.success){
+    showToast("Product removed");
+    await fetchAll();
+  }
+}
+
+function openProductModal(id){
+  const overlay = document.getElementById("productOverlay");
+  if(id){
+    const p = PRODUCTS.find(x=>x.id===id);
+    document.getElementById("productModalTitle").textContent = "Edit Product";
+    document.getElementById("pmId").value = p.id;
+    document.getElementById("pmVanity").value = p.vanity || "Anshul";
+    document.getElementById("pmName").value = p.name;
+    document.getElementById("pmCategory").value = p.category||"";
+    document.getElementById("pmBrand").value = p.brand||"";
+    document.getElementById("pmQty").value = p.qty;
+    document.getElementById("pmThreshold").value = p.threshold;
+  }else{
+    document.getElementById("productModalTitle").textContent = "Add Product";
+    document.getElementById("pmId").value = "";
+    document.getElementById("pmVanity").value = invVanityFilter || "Anshul";
+    document.getElementById("pmName").value = "";
+    document.getElementById("pmCategory").value = "";
+    document.getElementById("pmBrand").value = "";
+    document.getElementById("pmQty").value = 0;
+    document.getElementById("pmThreshold").value = 2;
+  }
+  overlay.classList.add("show");
+}
+function closeProductModal(){ document.getElementById("productOverlay").classList.remove("show"); }
+
+async function saveProduct(){
+  const id = document.getElementById("pmId").value;
+  const name = document.getElementById("pmName").value.trim();
+  if(!name){ showToast("Product name is required", true); return; }
+  const payload = {
+    id,
+    vanity: document.getElementById("pmVanity").value,
+    name,
+    category: document.getElementById("pmCategory").value.trim(),
+    brand: document.getElementById("pmBrand").value.trim(),
+    qty: document.getElementById("pmQty").value,
+    threshold: document.getElementById("pmThreshold").value
+  };
+  const res = await apiCall(id ? "updateProduct" : "addProduct", payload);
+  if(res.success){
+    showToast(id ? "Product updated" : "Product added");
+    closeProductModal();
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+async function submitTakeOut(){
+  const product = document.getElementById("toProduct").value;
+  const qty = document.getElementById("toQty").value;
+  const person = document.getElementById("toPerson").value;
+  if(!product){ showToast("Add a product to inventory first", true); return; }
+  const res = await apiCall("takeOut", {product, qty, person});
+  if(res.success){
+    showToast(`${product} marked as taken out ✓`);
+    document.getElementById("toQty").value = 1;
+    await fetchAll();
+  }else{
+    showToast("Something went wrong", true);
+  }
+}
+
+/* ============================================================
+   NAV / PAGE SWITCHING
+   ============================================================ */
+const PAGE_META = {
+  dashboard:{title:"Dashboard", sub:"A quick look at what's in the vanity and what's out with a client.", action:null},
+  inventory:{title:"Inventory", sub:"All products in the vanity — add, edit, and track stock.", action:"add"},
+  takeout:{title:"Take Out", sub:"Mark what's being taken out of the vanity, and by whom.", action:null},
+  currentlyout:{title:"Currently Out", sub:"Everything that hasn't been marked as returned to the bag yet.", action:null},
+  history:{title:"History", sub:"Full log of every take-out and return.", action:null},
+  checks:{title:"Vanity Checks", sub:"Before-setup and after-packup checklist submissions from the team.", action:null},
+};
+
+function goToPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  document.getElementById("page-"+page).classList.remove("hidden");
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active", n.dataset.page===page));
+  document.getElementById("pageTitle").textContent = PAGE_META[page].title;
+  document.getElementById("pageSubtitle").textContent = PAGE_META[page].sub;
+  const actions = document.getElementById("pageActions");
+  actions.innerHTML = "";
+  if(PAGE_META[page].action === "add"){
+    const btn = document.createElement("button");
+    btn.className = "btn btn-primary";
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Product`;
+    btn.onclick = ()=>openProductModal(null);
+    actions.appendChild(btn);
+  }
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("scrim").classList.remove("show");
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+document.querySelectorAll(".nav-item").forEach(btn=>{
+  btn.addEventListener("click", ()=>goToPage(btn.dataset.page));
+});
+document.getElementById("hamburger").addEventListener("click", ()=>{
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("scrim").classList.add("show");
+});
+document.getElementById("scrim").addEventListener("click", ()=>{
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("scrim").classList.remove("show");
+});
+document.getElementById("productModalClose").addEventListener("click", closeProductModal);
+document.getElementById("pmCancel").addEventListener("click", closeProductModal);
+document.getElementById("pmSave").addEventListener("click", saveProduct);
+document.getElementById("toSubmit").addEventListener("click", submitTakeOut);
+document.getElementById("takeOutModalClose").addEventListener("click", closeTakeOutModal);
+document.getElementById("toModalCancel").addEventListener("click", closeTakeOutModal);
+document.getElementById("toModalSave").addEventListener("click", saveTakeOutModal);
+document.getElementById("returnModalClose").addEventListener("click", closeReturnModal);
+document.getElementById("returnModalCancel").addEventListener("click", closeReturnModal);
+document.getElementById("returnModalSave").addEventListener("click", saveReturnModal);
+document.getElementById("invSearch").addEventListener("input", renderInventory);
+document.getElementById("invCategoryFilter").addEventListener("change", renderInventory);
+document.getElementById("histPersonFilter").addEventListener("change", renderHistory);
+document.getElementById("histStatusFilter").addEventListener("change", renderHistory);
+document.getElementById("checksNameFilter").addEventListener("change", renderVanityChecks);
+document.getElementById("checksVanityFilter").addEventListener("change", renderVanityChecks);
+document.getElementById("checksTypeFilter").addEventListener("change", renderVanityChecks);
+
+/* ============================================================
+   ADMIN SIGN-IN
+   ============================================================ */
+function initAdminGate(){
+  document.getElementById("gateScreen").classList.add("hidden");
+  document.getElementById("userApp").classList.add("hidden");
+  document.getElementById("adminApp").classList.add("hidden");
+  document.getElementById("adminGate").classList.remove("hidden");
+
+  const emailInput = document.getElementById("adminEmail");
+
+  document.getElementById("adminGateContinue").addEventListener("click", ()=>{
+    const email = emailInput.value.trim().toLowerCase();
+    if(!ADMIN_EMAILS.includes(email)){
+      showToast("That email isn't on the admin list", true);
+      return;
+    }
+    adminSignedIn = true;
+    document.getElementById("adminGate").classList.add("hidden");
+    document.getElementById("adminApp").classList.remove("hidden");
+    fetchAll();
+  });
+
+  document.getElementById("adminGateBack").addEventListener("click", ()=>{
+    const url = new URL(window.location.href);
+    url.searchParams.delete("admin");
+    window.location.href = url.toString();
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+if(isAdminMode){
+  initAdminGate();
+}else{
+  document.getElementById("adminApp").classList.add("hidden");
+  document.getElementById("adminGate").classList.add("hidden");
+  initGateScreen();
+  // Products/logs are fetched once the gate is submitted (see initGateScreen),
+  // but we warm the connection status indicator in the background regardless.
+}
+setInterval(()=>{ if(!usingMockData && ((isAdminMode && adminSignedIn) || SESSION.name)) fetchAll(); }, 30000); // auto-refresh every 30s once connected
+</script>
+</body>
+</html>
