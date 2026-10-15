@@ -261,28 +261,29 @@
   .user-card-name{font-weight:600;font-size:14.5px;color:var(--ink);}
   .user-card-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
   .user-card-actions{display:flex;align-items:center;gap:8px;}
+  .user-tab .nav-badge{margin-left:0;}
+  .select-bar{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;
+    background:var(--white);border:1px solid var(--line);border-radius:12px;
+  }
+  .select-all{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;margin:0;}
+  .select-count{font-size:12.5px;color:var(--ink-soft);font-weight:500;white-space:nowrap;}
+  .select-all input[type=checkbox], .user-card input[type=checkbox]{
+    width:20px;height:20px;padding:0;accent-color:var(--burgundy);flex-shrink:0;cursor:pointer;
+  }
+  .user-card.selected{border-color:var(--burgundy);background:var(--burgundy-light);}
+  .user-card .user-card-info{cursor:pointer;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .conn-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 0;padding:12px 14px;
+    background:var(--red-bg);border:1px solid #EFC9CC;color:var(--red);border-radius:12px;font-size:13px;line-height:1.45;
+  }
+  .conn-banner strong{display:block;font-size:13.5px;margin-bottom:2px;}
+  .conn-banner span{color:var(--ink);}
+  .conn-banner.demo{background:var(--amber-bg);border-color:#EBD6B3;color:var(--amber);}
   .qty-stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
   .qty-stepper button{background:var(--cream);border:none;width:28px;height:30px;font-size:15px;cursor:pointer;color:var(--ink);}
   .qty-stepper span{width:26px;text-align:center;font-size:13.5px;font-weight:600;}
-  /* ---- Take Out: tick on left + select all ---- */
-  .select-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 0 4px;}
-  .select-all{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);user-select:none;margin:0;}
-  .select-count{font-size:12.5px;color:var(--ink-soft);font-weight:500;}
-  .sel-box{
-    width:24px;height:24px;border-radius:7px;border:2px solid #D8CBD1;background:var(--white);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:transparent;
-  }
-  .sel-box svg{width:15px;height:15px;}
-  .sel-box.on{background:var(--green);border-color:var(--green);color:#fff;}
-  .sel-box.partial{background:var(--burgundy);border-color:var(--burgundy);color:#fff;}
-  .user-card.selected{background:var(--green-bg);border-color:#CFE7D6;}
-  .user-card .user-card-info{cursor:pointer;}
-  .btn-selected{background:var(--green);color:#fff;}
-  .btn-selected:hover{background:#336646;}
-  .takeout-footer{
-    position:sticky;bottom:0;background:var(--cream);border-top:1px solid var(--line);
-    padding:12px 0 calc(10px + env(safe-area-inset-bottom));margin-top:14px;box-shadow:0 -6px 14px rgba(43,34,41,.06);
-  }
   .user-empty{text-align:center;color:var(--ink-soft);font-style:italic;padding:50px 20px;font-size:14px;}
 
   /* ============ CHECKLIST TABS (Before Setup / After Packup) ============ */
@@ -337,7 +338,9 @@
     .user-header-inner{padding:16px 16px 10px;}
     .qty-stepper button{width:32px;height:34px;font-size:17px;}
     .qty-stepper span{width:30px;}
-    .user-card-actions{width:100%;justify-content:space-between;}
+    .user-card{flex-wrap:nowrap;gap:10px;}
+    .user-card-info{min-width:0;}
+    .user-card-actions{width:auto;}
     .checklist-row input[type=checkbox]{width:21px;height:21px;}
     .vanity-tab, .cat-pill{padding:9px 14px;font-size:12.5px;}
     .user-tab{font-size:13px;padding:11px 6px;}
@@ -406,6 +409,10 @@
   </header>
 
   <main class="user-main">
+    <div class="conn-banner hidden" id="connBanner" role="alert">
+      <div><strong id="connBannerTitle"></strong><span id="connBannerText"></span></div>
+      <button class="btn btn-sm btn-ghost" id="connRetry">Try again</button>
+    </div>
     <!-- BEFORE VANITY SETUP -->
     <section id="utab-before">
       <div class="checklist-intro">Tick only the products that are <strong>missing</strong> from the vanity before you start setting up.</div>
@@ -439,22 +446,26 @@
         <input type="text" id="userSearch" placeholder="Search products...">
         <select id="userCategoryFilter"><option value="">All categories</option></select>
       </div>
-      <div class="select-bar" id="selectBar">
-        <label class="select-all" id="selectAllBtn" onclick="toggleSelectAll()">
-          <span class="sel-box" id="selectAllBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-          Select all
-        </label>
-        <span class="select-count" id="selectCount"></span>
+      <div class="select-bar">
+        <label class="select-all"><input type="checkbox" id="userSelectAll"><span id="userSelectAllLabel">Select all</span></label>
+        <span class="select-count" id="userSelectedCount">0 selected</span>
       </div>
       <div id="userProductList" class="user-product-list"></div>
-      <div class="takeout-footer hidden" id="takeoutFooter">
-        <button class="btn btn-primary" id="takeoutSelectedBtn" style="width:100%;justify-content:center;" onclick="submitSelectedTakeOut()">Take Out Selected</button>
+      <div class="checklist-footer">
+        <button class="btn btn-primary" id="browseTakeOutBtn" style="width:100%;justify-content:center;" disabled>Take Out Selected (0)</button>
       </div>
     </section>
 
     <!-- MY ITEMS -->
     <section id="utab-mine" class="hidden">
+      <div class="select-bar" id="keptSelectBar">
+        <label class="select-all"><input type="checkbox" id="keptSelectAll"><span id="keptSelectAllLabel">Select all</span></label>
+        <span class="select-count" id="keptSelectedCount">0 selected</span>
+      </div>
       <div id="myItemsList" class="user-product-list"></div>
+      <div class="checklist-footer" id="keptFooter">
+        <button class="btn btn-primary" id="keptBackBtn" style="width:100%;justify-content:center;" disabled>Kept Back Selected (0)</button>
+      </div>
     </section>
   </main>
 </div>
@@ -735,7 +746,7 @@
    CONFIG — paste your Apps Script Web App URL here once deployed
    (Same pattern as the Availability Tracker: Deploy > Web App > Anyone)
    ============================================================ */
-const API_URL = "https://script.google.com/a/macros/anshulasaraogi.in/s/AKfycbwPVcnJvdVjX41FqOMyDR-vVEOrDveQbiAvLInM2YW1lvyx73uSaHhm4RQTbJ4MtuOa6A/exec";
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
 // Roster shown in "Taken By" — edit this list to match your team.
 const TEAM_ROSTER = ["Anshul", "Simran", "Parul", "Gauri"]; // add artist names as needed
@@ -888,23 +899,74 @@ function loadMockData(){
 /* ============================================================
    API LAYER
    ============================================================ */
+// ---- Why a request to the sheet can fail, in plain words ----
+const PROBLEM_TEXT = {
+  demo:    ["Demo mode — nothing is being saved", "This page isn't connected to the sheet yet. Paste the Web App URL into API_URL in index.html."],
+  login:   ["The sheet link is private", "In Apps Script go to Deploy → Manage deployments, set \"Who has access\" to Anyone, and deploy a new version."],
+  script:  ["The sheet script hit an error", "Check the tabs are named exactly Product Inventory, Take-Out Log and Vanity Checks, and that the latest Code.gs is deployed as a new version."],
+  network: ["Can't reach the sheet", "Check the internet connection, and that the Web App URL in index.html is the one ending in /exec."]
+};
+let connProblem = "";   // "", "demo", "login", "script", "network"
+let connDetail = "";    // message sent back by the script, when there is one
+
+function setConnProblem(problem, detail){
+  connProblem = problem || "";
+  connDetail = detail || "";
+  const banner = document.getElementById("connBanner");
+  if(banner){
+    if(connProblem){
+      const [title, text] = PROBLEM_TEXT[connProblem];
+      document.getElementById("connBannerTitle").textContent = title;
+      document.getElementById("connBannerText").textContent = text + (connDetail ? " (" + connDetail + ")" : "");
+      banner.classList.toggle("demo", connProblem === "demo");
+      banner.classList.remove("hidden");
+      document.getElementById("connRetry").classList.toggle("hidden", connProblem === "demo");
+    }else{
+      banner.classList.add("hidden");
+    }
+  }
+  setStatus(!connProblem);
+}
+
+// Returns {ok:true, data} or {ok:false, problem}. Never throws.
+async function callSheet(url, options){
+  let text;
+  try{
+    const res = await fetch(url, options);
+    text = await res.text();
+  }catch(err){
+    console.error(err);
+    return {ok:false, problem:"network"};
+  }
+  try{
+    return {ok:true, data: JSON.parse(text)};
+  }catch(e){
+    console.error("The sheet answered with something that isn't JSON:", text.slice(0,300));
+    return {ok:false, problem: /accounts\.google\.com|ServiceLogin|Sign in/i.test(text) ? "login" : "script"};
+  }
+}
+
 async function apiCall(action, payload={}){
   if(!API_URL || API_URL.includes("PASTE_YOUR")){
     return handleMockAction(action, payload);
   }
-  try{
-    const res = await fetch(API_URL, {
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"}, // avoids CORS preflight w/ Apps Script
-      body: JSON.stringify({action, ...payload})
-    });
-    const data = await res.json();
-    return data;
-  }catch(err){
-    console.error(err);
-    showToast("Couldn't reach the sheet — check your connection", true);
+  const r = await callSheet(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"}, // avoids CORS preflight w/ Apps Script
+    body: JSON.stringify({action, ...payload})
+  });
+  if(!r.ok){
+    setConnProblem(r.problem);
+    showToast(PROBLEM_TEXT[r.problem][0], true);
     return {success:false};
   }
+  if(r.data && r.data.success === false && r.data.error){
+    setConnProblem("script", r.data.error);
+    showToast("Sheet error: " + r.data.error, true);
+    return {success:false};
+  }
+  setConnProblem("");
+  return r.data;
 }
 
 async function fetchAll(){
@@ -913,24 +975,21 @@ async function fetchAll(){
       loadMockData();
       mockDataLoaded = true;
     }
-    setStatus(false);
+    setConnProblem("demo");
     renderAll();
     return;
   }
-  try{
-    const res = await fetch(API_URL + "?action=getAll");
-    const data = await res.json();
-    PRODUCTS = data.products || [];
-    LOGS = data.logs || [];
-    CHECKS = data.checks || [];
-    setStatus(true);
-  }catch(err){
-    console.error(err);
-    if(!mockDataLoaded){
-      loadMockData();
-      mockDataLoaded = true;
-    }
-    setStatus(false);
+  const r = await callSheet(API_URL + "?action=getAll");
+  if(r.ok && r.data && !r.data.error){
+    PRODUCTS = r.data.products || [];
+    LOGS = r.data.logs || [];
+    CHECKS = r.data.checks || [];
+    setConnProblem("");
+  }else if(r.ok){
+    setConnProblem("script", r.data && r.data.error);
+  }else{
+    // Don't fall back to sample data when a real sheet is configured: people would think their entries are saved.
+    setConnProblem(r.problem);
   }
   renderAll();
 }
@@ -958,6 +1017,26 @@ function handleMockAction(action, payload){
     LOGS.unshift({id, product:payload.product, qty:Number(payload.qty), person:payload.person, timeOut:new Date().toISOString(), status:"Out", timeReturned:"", returnedBy:""});
     return {success:true};
   }
+  if(action === "takeOutBatch"){
+    (payload.items||[]).forEach(it=>{
+      const p = PRODUCTS.find(x=>x.name===it.product);
+      if(p) p.qty = Math.max(0, Number(p.qty) - Number(it.qty));
+      const id = "L" + String(LOGS.length+1).padStart(3,"0");
+      LOGS.unshift({id, product:it.product, qty:Number(it.qty), person:payload.person, timeOut:new Date().toISOString(), status:"Out", timeReturned:"", returnedBy:""});
+    });
+    return {success:true};
+  }
+  if(action === "markReturnedBatch"){
+    (payload.ids||[]).forEach(id=>{
+      const l = LOGS.find(x=>x.id===id);
+      if(l && l.status==="Out"){
+        l.status="Returned"; l.timeReturned=new Date().toISOString(); l.returnedBy=payload.returnedBy||l.person;
+        const p = PRODUCTS.find(x=>x.name===l.product);
+        if(p) p.qty = Number(p.qty) + Number(l.qty);
+      }
+    });
+    return {success:true};
+  }
   if(action === "markReturned"){
     const l = LOGS.find(x=>x.id===payload.id);
     if(l){
@@ -979,7 +1058,9 @@ function handleMockAction(action, payload){
 
 function setStatus(live){
   document.getElementById("statusDot").classList.toggle("live", live);
-  document.getElementById("statusText").textContent = live ? "Synced with Sheet" : "Demo mode (not connected)";
+  document.getElementById("statusText").textContent = live
+    ? "Synced with Sheet"
+    : (connProblem ? PROBLEM_TEXT[connProblem][0] : "Connecting…");
 }
 
 /* ============================================================
@@ -1247,8 +1328,8 @@ async function saveReturnModal(){
 /* ============================================================
    USER MODE — gate screen, browse & take out, my items
    ============================================================ */
-const browseSelected = {}; // productName -> true when ticked for take out
 const userTakeoutQty = {}; // productName -> chosen qty on the stepper before taking out
+const userSelected = {};   // productName -> true when ticked for take-out
 
 function initGateScreen(){
   const nameInput = document.getElementById("gateName");
@@ -1296,6 +1377,11 @@ function initGateScreen(){
   });
 
   document.getElementById("userSearch").addEventListener("input", renderUserBrowse);
+  document.getElementById("userSelectAll").addEventListener("change", toggleSelectAllShown);
+  document.getElementById("connRetry").addEventListener("click", fetchAll);
+  document.getElementById("keptSelectAll").addEventListener("change", toggleSelectAllKept);
+  document.getElementById("keptBackBtn").addEventListener("click", userMarkKeptBackSelected);
+  document.getElementById("browseTakeOutBtn").addEventListener("click", userTakeOutSelected);
   document.getElementById("userCategoryFilter").addEventListener("change", renderUserBrowse);
   // Note: beforeSubmit/afterSubmit click handlers are assigned dynamically
   // inside renderChecklist(), since the button toggles between "Submit"
@@ -1417,7 +1503,6 @@ function renderBrowseVanityTabs(){
 
 function selectBrowseVanity(vanity){
   browseVanity = vanity;
-  Object.keys(browseSelected).forEach(k=>delete browseSelected[k]);
   renderUserBrowse();
 }
 
@@ -1442,77 +1527,84 @@ function renderUserBrowse(){
   const el = document.getElementById("userProductList");
   if(!list.length){
     el.innerHTML = `<div class="user-empty">No products yet in ${browseVanity}'s vanity.</div>`;
-    browseVisible = [];
-    updateSelectionUI();
+    updateBrowseSelectionUI(list);
     return;
   }
-  browseVisible = list.map(p=>p.name);
-  const TICK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
   el.innerHTML = list.map(p=>{
     const qty = userTakeoutQty[p.name] || 1;
-    const esc = p.name.replace(/'/g,"\\'");
-    const sel = !!browseSelected[p.name];
+    const sel = !!userSelected[p.name];
+    const nm = p.name.replace(/'/g,"\\'");
     return `
     <div class="user-card ${sel?'selected':''}">
-      <span class="sel-box ${sel?'on':''}" onclick="toggleBrowseSelect('${esc}')">${TICK}</span>
-      <div class="user-card-info" onclick="toggleBrowseSelect('${esc}')">
+      <input type="checkbox" ${sel?"checked":""} onchange="toggleUserSelect('${nm}')" aria-label="Select ${p.name}">
+      <div class="user-card-info" onclick="toggleUserSelect('${nm}')">
         <div class="user-card-name">${p.name}</div>
         <div class="user-card-meta">${p.category||"—"}${p.brand ? " · "+p.brand : ""}</div>
       </div>
       <div class="user-card-actions">
         <div class="qty-stepper">
-          <button onclick="adjustUserQty('${p.name.replace(/'/g,"\\'")}',-1)">−</button>
+          <button onclick="adjustUserQty('${nm}',-1)">−</button>
           <span id="qty-${p.id}">${qty}</span>
-          <button onclick="adjustUserQty('${p.name.replace(/'/g,"\\'")}',1)">+</button>
+          <button onclick="adjustUserQty('${nm}',1)">+</button>
         </div>
-        <button class="btn btn-sm ${sel?'btn-selected':'btn-primary'}" onclick="toggleBrowseSelect('${esc}')">${sel?'✓ Selected':'Take Out'}</button>
       </div>
     </div>`;
   }).join("");
-  updateSelectionUI();
+  updateBrowseSelectionUI(list);
 }
 
-let browseVisible = []; // names currently shown in the Take Out list (after filters)
+// Keeps the Select all box, the counter and the Take Out Selected button in step with the ticks.
+function updateBrowseSelectionUI(list){
+  const total = Object.keys(userSelected).length;
+  const allBox = document.getElementById("userSelectAll");
+  const shownSelected = list.filter(p=>userSelected[p.name]).length;
+  allBox.checked = list.length > 0 && shownSelected === list.length;
+  allBox.indeterminate = shownSelected > 0 && shownSelected < list.length;
+  allBox.disabled = list.length === 0;
+  document.getElementById("userSelectAllLabel").textContent = list.length ? `Select all (${list.length})` : "Select all";
+  document.getElementById("userSelectedCount").textContent = `${total} selected`;
+  const btn = document.getElementById("browseTakeOutBtn");
+  btn.disabled = total === 0;
+  btn.textContent = `Take Out Selected (${total})`;
+}
 
-function selectedVisible(){ return browseVisible.filter(n=>browseSelected[n]); }
+function currentBrowseList(){
+  const search = (document.getElementById("userSearch").value||"").toLowerCase();
+  const catFilter = document.getElementById("userCategoryFilter").value;
+  return PRODUCTS.filter(p =>
+    p.vanity === browseVanity &&
+    (!search || p.name.toLowerCase().includes(search) || (p.brand||"").toLowerCase().includes(search)) &&
+    (!catFilter || p.category === catFilter)
+  );
+}
 
-function toggleBrowseSelect(name){
-  if(browseSelected[name]) delete browseSelected[name]; else browseSelected[name] = true;
+function toggleUserSelect(name){
+  if(userSelected[name]) delete userSelected[name]; else userSelected[name] = true;
   renderUserBrowse();
 }
 
-function toggleSelectAll(){
-  const allOn = browseVisible.length && browseVisible.every(n=>browseSelected[n]);
-  browseVisible.forEach(n=>{ if(allOn) delete browseSelected[n]; else browseSelected[n] = true; });
+function toggleSelectAllShown(){
+  const list = currentBrowseList();
+  const allSelected = list.length > 0 && list.every(p=>userSelected[p.name]);
+  list.forEach(p=>{ if(allSelected) delete userSelected[p.name]; else userSelected[p.name] = true; });
   renderUserBrowse();
 }
 
-function updateSelectionUI(){
-  const n = selectedVisible().length;
-  const total = browseVisible.length;
-  const box = document.getElementById("selectAllBox");
-  box.classList.toggle("on", total>0 && n===total);
-  box.classList.toggle("partial", n>0 && n<total);
-  document.getElementById("selectBar").classList.toggle("hidden", total===0);
-  document.getElementById("selectCount").textContent = n ? `${n} of ${total} selected` : "";
-  document.getElementById("takeoutFooter").classList.toggle("hidden", n===0);
-  document.getElementById("takeoutSelectedBtn").textContent = `Take Out Selected (${n})`;
-}
-
-async function submitSelectedTakeOut(){
-  const names = selectedVisible();
+async function userTakeOutSelected(){
+  const names = Object.keys(userSelected);
   if(!names.length) return;
-  const btn = document.getElementById("takeoutSelectedBtn");
-  btn.disabled = true; btn.textContent = "Submitting...";
-  let ok = 0;
-  for(const name of names){
-    const res = await apiCall("takeOut", {product: name, qty: userTakeoutQty[name] || 1, person: SESSION.name});
-    if(res && res.success){ ok++; delete browseSelected[name]; delete userTakeoutQty[name]; }
+  const btn = document.getElementById("browseTakeOutBtn");
+  btn.disabled = true; btn.textContent = "Taking out…";
+  const items = names.map(n=>({product:n, qty:userTakeoutQty[n]||1}));
+  const res = await apiCall("takeOutBatch", {items, person: SESSION.name});
+  if(res.success){
+    showToast(`${items.length} item${items.length===1?"":"s"} taken out ✓`);
+    names.forEach(n=>{ delete userSelected[n]; delete userTakeoutQty[n]; });
+    await fetchAll();
+  }else{
+    showToast("Something went wrong — nothing was saved", true);
+    renderUserBrowse();
   }
-  btn.disabled = false;
-  if(ok === names.length) showToast(`${ok} item${ok>1?'s':''} taken out ✓`);
-  else showToast(`${ok} of ${names.length} taken out — please retry the rest`, true);
-  await fetchAll();
 }
 
 function adjustUserQty(name, delta){
@@ -1521,48 +1613,78 @@ function adjustUserQty(name, delta){
   renderUserBrowse();
 }
 
-async function userTakeOut(productName, productId){
-  const qty = userTakeoutQty[productName] || 1;
-  const res = await apiCall("takeOut", {product: productName, qty, person: SESSION.name});
-  if(res.success){
-    showToast(`${productName} taken out ✓`);
-    delete userTakeoutQty[productName];
-    await fetchAll();
-  }else{
-    showToast("Something went wrong", true);
-  }
+const keptSelected = {};   // log id -> true when ticked as kept back
+
+function myOutLogs(){
+  return LOGS.filter(l => l.person === SESSION.name && l.status === "Out");
 }
 
 function renderMyItems(){
   if(isAdminMode) return;
-  const mine = LOGS.filter(l => l.person === SESSION.name && l.status === "Out");
+  const mine = myOutLogs();
   document.getElementById("myItemsBadge").textContent = mine.length;
+  // forget ticks for entries that are no longer out (returned elsewhere, or refreshed from the sheet)
+  Object.keys(keptSelected).forEach(id=>{ if(!mine.some(l=>l.id===id)) delete keptSelected[id]; });
 
   const el = document.getElementById("myItemsList");
-  if(!mine.length){
+  const has = mine.length > 0;
+  document.getElementById("keptSelectBar").classList.toggle("hidden", !has);
+  document.getElementById("keptFooter").classList.toggle("hidden", !has);
+  if(!has){
     el.innerHTML = `<div class="user-empty">Nothing checked out right now.<br>Everything's kept back ✓</div>`;
     return;
   }
-  el.innerHTML = mine.map(l=>`
-    <div class="user-card">
-      <div class="user-card-info">
+  el.innerHTML = mine.map(l=>{
+    const sel = !!keptSelected[l.id];
+    return `
+    <div class="user-card ${sel?'selected':''}">
+      <input type="checkbox" ${sel?"checked":""} onchange="toggleKeptSelect('${l.id}')" aria-label="Select ${l.product}">
+      <div class="user-card-info" onclick="toggleKeptSelect('${l.id}')">
         <div class="user-card-name">${l.product}</div>
         <div class="user-card-meta">Qty ${l.qty} · Taken out ${fmtTime(l.timeOut)}</div>
       </div>
-      <div class="user-card-actions">
-        <button class="btn btn-sm btn-primary" onclick="userMarkKeptBack('${l.id}')">Kept Back</button>
-      </div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
+  updateKeptSelectionUI(mine);
 }
 
-async function userMarkKeptBack(logId){
-  const res = await apiCall("markReturned", {id: logId, returnedBy: SESSION.name});
+function updateKeptSelectionUI(mine){
+  const total = Object.keys(keptSelected).length;
+  const allBox = document.getElementById("keptSelectAll");
+  allBox.checked = mine.length > 0 && total === mine.length;
+  allBox.indeterminate = total > 0 && total < mine.length;
+  document.getElementById("keptSelectAllLabel").textContent = `Select all (${mine.length})`;
+  document.getElementById("keptSelectedCount").textContent = `${total} selected`;
+  const btn = document.getElementById("keptBackBtn");
+  btn.disabled = total === 0;
+  btn.textContent = `Kept Back Selected (${total})`;
+}
+
+function toggleKeptSelect(id){
+  if(keptSelected[id]) delete keptSelected[id]; else keptSelected[id] = true;
+  renderMyItems();
+}
+
+function toggleSelectAllKept(){
+  const mine = myOutLogs();
+  const allSelected = mine.length > 0 && mine.every(l=>keptSelected[l.id]);
+  mine.forEach(l=>{ if(allSelected) delete keptSelected[l.id]; else keptSelected[l.id] = true; });
+  renderMyItems();
+}
+
+async function userMarkKeptBackSelected(){
+  const ids = Object.keys(keptSelected);
+  if(!ids.length) return;
+  const btn = document.getElementById("keptBackBtn");
+  btn.disabled = true; btn.textContent = "Marking as kept back…";
+  const res = await apiCall("markReturnedBatch", {ids, returnedBy: SESSION.name});
   if(res.success){
-    showToast("Marked as kept back ✓");
+    showToast(`${ids.length} item${ids.length===1?"":"s"} marked kept back ✓`);
+    ids.forEach(id=>delete keptSelected[id]);
     await fetchAll();
   }else{
-    showToast("Something went wrong", true);
+    showToast("Something went wrong — nothing was saved", true);
+    renderMyItems();
   }
 }
 
